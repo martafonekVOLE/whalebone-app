@@ -1,0 +1,69 @@
+---
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: all
+  disable:
+    - exhaustruct
+    - varnamelen
+    - funlen
+    - nonamedreturns
+    - gochecknoglobals
+    - depguard
+    - tagliatelle
+    - wsl
+    - nlreturn
+    - tagalign
+  settings:
+    godox:
+      keywords:
+        - FIXME
+        - BUG
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - generic
+    dupl:
+      threshold: 400
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+    tagliatelle:
+      case:
+        overrides:
+          - pkg: internal/config
+            rules:
+              yaml: snake
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+    - golines
+
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+      custom-order: true
+
+    golines:
+      max-len: 120
+
+output:
+  formats:
+    text:
+      path: stdout
+    tab:
+      path: golangci-lint.out
+      colors: false
+    html:
+      path: golangci-lint.out.html

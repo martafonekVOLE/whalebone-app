@@ -1,0 +1,6 @@
+.env
+golangci-lint.out
+golangci-lint.out.html
+cmd/simple-microservice/simple-microservice
+cmd/simple-microservice/main
+AGENTS.md
