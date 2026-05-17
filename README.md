@@ -11,7 +11,12 @@ Make sure you have the following installed on your system:
 
 ## How to Run 🚀
 
-Use the `Makefile` to easily run and manage the application. It provides several targets:
+### Prepare your environment
+Copy the example environment file and adjust the configuration:
+
+```bash
+cp .env.example .env
+```
 
 ### Running via Docker 🐋
 Run following to build the image and start the application along with its dependencies (e.g., **PostgreSQL**) in the background:
