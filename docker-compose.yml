@@ -13,7 +13,7 @@ services:
       - internal_network
     ports:
       # Exposed port for local development and debugging only. Disable for production
-      - "5432:${DB_PORT}"
+      - "${DB_EXPOSE_PORT}:${DB_PORT}"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -42,7 +42,7 @@ services:
     networks:
       - internal_network
     ports:
-      - "8080:8080"
+    - "${EXPOSE_SERVER_PORT}:${SERVER_PORT}"
 
 networks:
   internal_network:
