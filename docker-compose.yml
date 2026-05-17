@@ -13,7 +13,7 @@ services:
       - internal_network
     ports:
       # Exposed port for local development and debugging only. Disable for production
-      - "5432:5432"
+      - "5432:${DB_PORT}"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
