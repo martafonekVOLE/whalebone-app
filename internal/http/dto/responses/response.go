@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
+// Response is a generic API response wrapper used by all HTTP handlers.
 type Response struct {
 	Data             map[string]any    `json:"data,omitempty"`
 	Error            string            `json:"error,omitempty"`
@@ -15,6 +17,7 @@ type Response struct {
 	ValidationErrors map[string]string `json:"validation_errors,omitempty"`
 }
 
+// ErrorBytes returns a JSON-encoded API error response with the given HTTP status code.
 func ErrorBytes(httpCode int, err error) []byte {
 	response := Response{
 		Error: http.StatusText(httpCode),
@@ -32,6 +35,7 @@ func ErrorBytes(httpCode int, err error) []byte {
 	return bytes
 }
 
+// ValidationErrorBytes returns a JSON-encoded API validation error response with detail of invalid fields.
 func ValidationErrorBytes(httpCode int, err error) []byte {
 	response := Response{
 		Error:  http.StatusText(httpCode),
@@ -40,7 +44,6 @@ func ValidationErrorBytes(httpCode int, err error) []byte {
 
 	var validationErrs validator.ValidationErrors
 	if errors.As(err, &validationErrs) {
-
 		errsMap := make(map[string]string)
 
 		for _, e := range validationErrs {
@@ -60,6 +63,7 @@ func ValidationErrorBytes(httpCode int, err error) []byte {
 	return bytes
 }
 
+// DataBytes returns a valid JSON-encoded API response.
 func DataBytes(name string, data any) (bytes []byte, err error) {
 	response := Response{
 		Data: map[string]any{

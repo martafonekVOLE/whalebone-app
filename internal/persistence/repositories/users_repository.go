@@ -1,21 +1,24 @@
 package repositories
 
 import (
+	"context"
 	"simple-microservice/internal/persistence/models"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
+// UsersRepository handles persistence of User entities.
 type UsersRepository struct {
 	DB     *gorm.DB
 	logger *zap.Logger
 }
 
-func (u *UsersRepository) GetUser(id uint64) (*models.User, error) {
+// GetUser retrieves a user by its ID.
+func (u *UsersRepository) GetUser(ctx context.Context, id uint64) (*models.User, error) {
 	var user models.User
 
-	result := u.DB.First(&user, id)
+	result := u.DB.WithContext(ctx).First(&user, id)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -24,8 +27,9 @@ func (u *UsersRepository) GetUser(id uint64) (*models.User, error) {
 	return &user, nil
 }
 
-func (u *UsersRepository) CreateUser(user *models.User) error {
-	result := u.DB.Create(&user)
+// CreateUser saves a new User record in the database.
+func (u *UsersRepository) CreateUser(ctx context.Context, user *models.User) error {
+	result := u.DB.WithContext(ctx).Create(user)
 
 	if result.Error != nil {
 		return result.Error

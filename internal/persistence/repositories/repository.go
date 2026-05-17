@@ -10,7 +10,7 @@ type Repository struct {
 	usersRepository UsersRepository
 }
 
-// NewRepository is a repository for Repository.
+// NewRepository initializes all application repositories.
 func NewRepository(db *gorm.DB, logger *zap.Logger) *Repository {
 	return &Repository{
 		usersRepository: UsersRepository{

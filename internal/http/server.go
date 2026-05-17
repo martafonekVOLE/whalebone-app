@@ -2,28 +2,41 @@ package http
 
 import (
 	"net/http"
-	"time"
-
 	"simple-microservice/internal/http/controllers"
 	"simple-microservice/internal/http/dto/responses"
+	"simple-microservice/internal/http/middleware"
+	"time"
+
+	chimiddleware "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
 const (
-	defaultServerReadHeaderTimeout  = 2 * time.Second
-	defaultServerIdleTimeoutTimeout = 30 * time.Second
+	defaultServerTimeout           = 5 * time.Second
+	defaultServerReadHeaderTimeout = 2 * time.Second
+	defaultServerIdleTimeout       = 30 * time.Second
 )
 
+// NewServer creates and configures an HTTP server.
 func NewServer(
 	hostname string,
 	controller controllers.Controller,
+	logger *zap.Logger,
 ) (server *http.Server, err error) {
 	router := chi.NewRouter()
-	router.NotFound(notFound)
-	router.MethodNotAllowed(methodNotAllowed)
+	router.NotFound(NotFound)
+	router.MethodNotAllowed(MethodNotAllowed)
 
 	router.Route("/api/v1", func(r chi.Router) {
+		r.Use(chimiddleware.RequestID)
+		r.Use(middleware.Logger(logger))
+		r.Use(chimiddleware.Recoverer)
+		r.Use(chimiddleware.Timeout(defaultServerTimeout))
+
+		r.Use(middleware.ContentType)
+
 		r.Mount("/users", NewUsersRouter(controller.Users()))
 	})
 
@@ -32,19 +45,21 @@ func NewServer(
 		ReadTimeout:       1 * time.Second,
 		ReadHeaderTimeout: defaultServerReadHeaderTimeout,
 		WriteTimeout:      1 * time.Second,
-		IdleTimeout:       defaultServerIdleTimeoutTimeout,
+		IdleTimeout:       defaultServerIdleTimeout,
 		Handler:           router,
 	}, nil
 }
 
-func notFound(w http.ResponseWriter, _ *http.Request) {
+// NotFound handles requests to undefined routes.
+func NotFound(w http.ResponseWriter, _ *http.Request) {
 	code := http.StatusNotFound
 	w.WriteHeader(code)
 	w.Header().Add("Content-Type", "application/json")
 	_, _ = w.Write(responses.ErrorBytes(code, nil))
 }
 
-func methodNotAllowed(w http.ResponseWriter, _ *http.Request) {
+// MethodNotAllowed handles requests with an unsupported HTTP method.
+func MethodNotAllowed(w http.ResponseWriter, _ *http.Request) {
 	code := http.StatusMethodNotAllowed
 	w.WriteHeader(code)
 	w.Header().Add("Content-Type", "application/json")

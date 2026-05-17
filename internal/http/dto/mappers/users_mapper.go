@@ -2,23 +2,25 @@ package mappers
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-
 	"simple-microservice/internal/http/dto/requests"
 	"simple-microservice/internal/http/dto/responses"
 	"simple-microservice/internal/persistence/models"
+
+	"github.com/google/uuid"
 )
 
+// MapUserToResponse converts User model to required response format.
 func MapUserToResponse(user *models.User) responses.UserResponse {
 	return responses.UserResponse{
 		ID:          user.ID,
 		ExternalID:  user.ExternalId.String(),
-		Name:        user.FirstName + " " + user.LastName,
-		Email:       user.Email,
-		DateOfBirth: user.DateOfBirth.String(),
+		Name:        *user.Name,
+		Email:       *user.Email,
+		DateOfBirth: user.DateOfBirth,
 	}
 }
 
+// MapRequestToUser converts incoming request into User model.
 func MapRequestToUser(request requests.CreateUserRequest) (*models.User, error) {
 	parsedExternalId, err := uuid.Parse(request.ExternalId)
 	if err != nil {
@@ -27,7 +29,8 @@ func MapRequestToUser(request requests.CreateUserRequest) (*models.User, error) 
 
 	return &models.User{
 		ExternalId:  parsedExternalId,
-		Email:       request.Email,
+		Name:        &request.Name,
+		Email:       &request.Email,
 		DateOfBirth: request.DateOfBirth,
 	}, nil
 }

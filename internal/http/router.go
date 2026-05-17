@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// NewUsersRouter creates a chi router with registered user-related HTTP endpoints.
 func NewUsersRouter(c *controllers.UsersController) *chi.Mux {
 	router := chi.NewRouter()
 

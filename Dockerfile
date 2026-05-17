@@ -19,9 +19,13 @@ FROM alpine:latest
 
 WORKDIR /app
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata && \
+    addgroup -S appgroup && \
+    adduser -S appuser -G appgroup
 
-COPY --from=builder /app/bin/microservice .
+COPY --chown=appuser:appgroup --from=builder /app/bin/microservice .
+
+USER appuser
 
 EXPOSE 8080
 

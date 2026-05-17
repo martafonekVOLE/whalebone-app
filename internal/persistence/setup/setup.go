@@ -2,10 +2,9 @@ package setup
 
 import (
 	"fmt"
-	"time"
-
 	"simple-microservice/internal/persistence/config"
 	"simple-microservice/internal/persistence/models"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -27,11 +26,11 @@ func ConnectDatabase(config config.Config) (*gorm.DB, error) {
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get underlying sql.DB %w", err)
+		return nil, fmt.Errorf("failed to get underlying sql.DB: %w", err)
 	}
 
 	if config.MaxIdleConnections != nil {
-		sqlDB.SetMaxIdleConns(*config.MaxOpenConnections)
+		sqlDB.SetMaxIdleConns(*config.MaxIdleConnections)
 	} else {
 		sqlDB.SetMaxIdleConns(DefaultMaxIdleConnections)
 	}

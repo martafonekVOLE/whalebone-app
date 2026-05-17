@@ -2,6 +2,7 @@ package requests
 
 import "time"
 
+// CreateUserRequest represents an incoming request.
 type CreateUserRequest struct {
 	Name        string    `json:"name"          validate:"required"`
 	Email       string    `json:"email"         validate:"required,email"`

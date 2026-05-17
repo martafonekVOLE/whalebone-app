@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: simple-microservice
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy

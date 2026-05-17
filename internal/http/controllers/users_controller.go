@@ -1,33 +1,45 @@
 package controllers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"simple-microservice/internal/http/dto/mappers"
+	"simple-microservice/internal/http/dto/requests"
+	"simple-microservice/internal/http/dto/responses"
+	"simple-microservice/internal/persistence/models"
 	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-
-	"simple-microservice/internal/http/dto/mappers"
-	"simple-microservice/internal/http/dto/requests"
-	"simple-microservice/internal/http/dto/responses"
-	"simple-microservice/internal/persistence/models"
 )
 
+// UserRepository defines an interface with persistent operations.
 type UserRepository interface {
-	GetUser(id uint64) (*models.User, error)
-	CreateUser(user *models.User) error
+	GetUser(ctx context.Context, id uint64) (*models.User, error)
+	CreateUser(ctx context.Context, user *models.User) error
 }
 
+// UsersController handles user-related HTTP requests.
 type UsersController struct {
 	validator  *validator.Validate
 	repository UserRepository
 	logger     *zap.Logger
 }
 
+// NewUsersController instantiates a new UserRepository.
+func NewUsersController(validator *validator.Validate, repo UserRepository, logger *zap.Logger) UsersController {
+	return UsersController{
+		validator:  validator,
+		repository: repo,
+		logger:     logger,
+	}
+}
+
+// GetUserById handles retrieving a user by its identifier.
 func (u *UsersController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(r.PathValue("id"), 10, 64)
 	if err != nil {
@@ -40,7 +52,7 @@ func (u *UsersController) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := u.repository.GetUser(id)
+	user, err := u.repository.GetUser(r.Context(), id)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		u.logger.Error("failed to find user", zap.Uint64("id", id), zap.Error(err))
 
@@ -75,6 +87,7 @@ func (u *UsersController) GetUserById(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(bytes)
 }
 
+// CreateUser handles user creation requests.
 func (u *UsersController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	body := r.Body
 
@@ -128,7 +141,7 @@ func (u *UsersController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = u.repository.CreateUser(user)
+	err = u.repository.CreateUser(r.Context(), user)
 	if err != nil {
 		u.logger.Error("failed to create user", zap.Error(err))
 
